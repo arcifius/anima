@@ -27,6 +27,13 @@ task dist(dependsOn: [build], type: Jar) {
     with jar
 }
 
+task publish(type: Copy) {
+	copy {
+		from 'build/libs/desktop-1.0.jar'
+		into "/opt/apache-tomcat-8.0.37/webapps/downloads/"		
+	}
+}
+
 task buildAndPublish {
     dependsOn 'clean'
     dependsOn 'build'
@@ -35,13 +42,6 @@ task buildAndPublish {
     tasks.findByName('build').mustRunAfter 'clean'
     tasks.findByName('dist').mustRunAfter 'build'
     tasks.findByName('publish').mustRunAfter 'dist'
-}
-
-task publish(type: Copy, dependsOn: [dist]) {
-	copy {
-		from 'build/libs/desktop-1.0.jar'
-		into "/opt/apache-tomcat-8.0.37/webapps/downloads/"		
-	}
 }	
 
 repositories {
