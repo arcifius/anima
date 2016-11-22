@@ -14,7 +14,7 @@ task run(dependsOn: classes, type: JavaExec) {
     ignoreExitValue = true
 }
 
-task dist(type: Jar) {
+task dist(dependsOn: [build], type: Jar) {
     from files(sourceSets.main.output.classesDir)
     from files(sourceSets.main.output.resourcesDir)
     from {configurations.compile.collect {zipTree(it)}}
@@ -25,6 +25,16 @@ task dist(type: Jar) {
     }
     
     with jar
+}
+
+task buildAndPublish {
+    dependsOn 'clean'
+    dependsOn 'build'
+    dependsOn 'dist'
+    dependsOn 'publish'
+    tasks.findByName('build').mustRunAfter 'clean'
+    tasks.findByName('dist').mustRunAfter 'build'
+    tasks.findByName('publish').mustRunAfter 'dist'
 }
 
 task publish(type: Copy, dependsOn: [dist]) {
