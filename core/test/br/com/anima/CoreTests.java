@@ -10,7 +10,7 @@ public class CoreTests {
 	@Test
 	public void loginTest() {
 		
-		loggedIn = false;		
+		boolean loggedIn = false;		
 		assertEquals(true, loggedIn);			
 		
 	}
