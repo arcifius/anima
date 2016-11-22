@@ -11,7 +11,7 @@ public class CoreTests {
 	public void loginTest() {
 		
 		loggedIn = false;		
-		assertEquals(true, loggedIn);				
+		assertEquals(true, loggedIn);			
 		
 	}
 }
