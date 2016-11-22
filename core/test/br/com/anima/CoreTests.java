@@ -10,9 +10,8 @@ public class CoreTests {
 	@Test
 	public void loginTest() {
 		
-		
-			assertTrue(true);
-				
+		loggedIn = false;		
+		assertEquals(true, loggedIn);				
 		
 	}
 }
