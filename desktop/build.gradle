@@ -27,6 +27,13 @@ task dist(type: Jar) {
     with jar
 }
 
+task publish(type: Copy, dependsOn: [dist]) {
+	copy {
+		from 'build/libs/desktop-1.0.jar'
+		into "/opt/apache-tomcat-8.0.37/webapps/downloads/"		
+	}
+}	
+
 repositories {
     mavenCentral()
 }
