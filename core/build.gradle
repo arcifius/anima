@@ -6,6 +6,10 @@ sourceCompatibility = 1.8
 sourceSets.main.java.srcDirs = [ "src/" ]
 sourceSets.test.java.srcDirs = [ "test/" ]
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.40' //we want gradle 2.10 to run this project
+}
+
 dependencies {
     compile (    	
     	"com.underwaterapps.overlap2druntime:overlap2d-runtime-libgdx:0.1.2-SNAPSHOT"
