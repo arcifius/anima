@@ -13,7 +13,7 @@ public class DesktopLauncher {
 		config.width = 1366;
         config.height = 768;
         config.resizable = false;   
-        config.title = "Anima Wishes v1.0";
+        config.title = "Anima Wishes v1.3 BUILD 24";
         config.addIcon("icons/anima.fw.png", FileType.Internal);
 		new LwjglApplication(new GameManager(), config);
 	}
