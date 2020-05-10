@@ -21,24 +21,25 @@ import com.uwsoft.editor.renderer.SceneLoader;
 import com.uwsoft.editor.renderer.components.additional.ButtonComponent;
 import com.uwsoft.editor.renderer.utils.ItemWrapper;
 
-import br.com.anima.GameManager;
+import br.com.anima.Igniter;
 import br.com.anima.utils.CharacterDescription;
 import br.com.anima.utils.InputTransform;
 import br.com.anima.utils.Objects;
 
+@Deprecated
 public class SelectCharacterScreen implements Screen, InputProcessor {
 
 	private SceneLoader sl;
 	private Skin skin;
 	private Viewport viewport;
 	private ItemWrapper rootItem;
-	private GameManager game;
+	private Igniter game;
 	private LinkedList<CharacterDescription> characters;
 	private ThreadLocalRandom rand;
 	private HashMap<CharacterDescription, ParticleEffect> particleSpawns;
 	private BitmapFont font;
 
-	public SelectCharacterScreen(GameManager game) {
+	public SelectCharacterScreen(Igniter game) {
 		this.game = game;
 
 		characters = (LinkedList<CharacterDescription>) Objects.gameController.retrieveActiveCharacters();
@@ -193,7 +194,8 @@ public class SelectCharacterScreen implements Screen, InputProcessor {
 
 					if (character.isChoosen()) {
 
-						game.setScreen(new GameScreen(this.game, character));
+						// TODO: use setView
+						// game.setScreen(new GameScreen(this.game, character));
 
 					} else {
 						System.out.println(character.getNome() + " foi selecionado!");

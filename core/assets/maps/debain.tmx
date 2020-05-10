@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.3.4" orientation="orthogonal" renderorder="left-up" width="100" height="100" tilewidth="32" tileheight="32" infinite="0" nextlayerid="4" nextobjectid="1">
+ <tileset firstgid="1" source="grass-tileset.tsx"/>
+ <layer id="1" name="ground" width="100" height="100">
+  <data encoding="base64" compression="zlib">
+   eJztwwEJAAAMBKH7/qUHy6Hgqqmqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqv8AX0MnEQ==
+  </data>
+ </layer>
+ <layer id="3" name="midlevel" width="100" height="100">
+  <data encoding="base64" compression="zlib">
+   eJzt2EEKhCAYgFEXnWtO0aK7dPkhKKYZhsgyf6P3IFoqfJjaK9GCcX6/Vg8xxvTpsdAkxr8WC03q2mqx0KSOPS0Wmlwrp8WaJmV16XiLyVPWSVdpnDMtKE8LAIB7qXVuB4Bc0XtU9PgAAAAAQAz/BoEcvhkAAACU0Nr9srX5wFNYewAAABzlTgkA1Ob8AQAAcD8t3uVanBMA0AbnBAAAAAAAnmaIngBfhlSuST8/nFOiiRZlHW3SJy2ukttEh+vtbaJFPUPa7qJFjN8m9op467WiQzumHm8fURgD
+  </data>
+ </layer>
+</map>

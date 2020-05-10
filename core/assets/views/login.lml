@@ -1,0 +1,7 @@
+<window title="@loginFormTitle">
+    @loginMessage
+
+    <textField id="loginInput" message="@login"/>
+    <textField id="passwordInput" message="@password" passwordMode="true"/>
+    <textButton onclick="signIn">@enterGame</textButton>
+</window>

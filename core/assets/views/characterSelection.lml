@@ -1,0 +1,19 @@
+<table fillParent="true">
+    <verticalGroup padding="2">
+        @selectYourCharacter
+
+        <container height=64 width=32 onclick="select">
+            <image skin="default" style="button" scaling="fill"/>
+        </container>
+
+        <container height=64 width=32 onclick="select">
+            <image skin="default" style="button" scaling="fill"/>
+        </container>
+
+        <container height=64 width=32 onclick="select">
+            <image skin="default" style="button" scaling="fill"/>
+        </container>
+
+        <textButton onclick="enterGame">@diveIntoWorld</textButton>
+    </verticalGroup>
+</table>

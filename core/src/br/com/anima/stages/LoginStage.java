@@ -1,146 +1,139 @@
 package br.com.anima.stages;
 
-import java.util.List;
-
-import com.badlogic.ashley.core.Entity;
+import br.com.anima.utils.ButtonDescription;
+import br.com.anima.utils.Values;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Button;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.uwsoft.editor.renderer.SceneLoader;
-import com.uwsoft.editor.renderer.components.DimensionsComponent;
-import com.uwsoft.editor.renderer.components.PolygonComponent;
 import com.uwsoft.editor.renderer.components.TransformComponent;
-import com.uwsoft.editor.renderer.components.additional.ButtonComponent;
 import com.uwsoft.editor.renderer.data.CompositeItemVO;
 import com.uwsoft.editor.renderer.scene2d.CompositeActor;
 import com.uwsoft.editor.renderer.utils.ItemWrapper;
 
-import br.com.anima.screens.GameScreen;
-import br.com.anima.utils.ButtonDescription;
-import br.com.anima.utils.Values;
+import java.util.List;
 
 /**
  * Created by Augusto Russo on 01/06/2016
  */
 public class LoginStage extends Stage {
 
-	private Skin skin;
-	private TextField passInputField;
-	private TextField loginInputField;
-	private CompositeActor dialogBox;
-	private SceneLoader sc;
+    private Skin skin;
+    private TextField passInputField;
+    private TextField loginInputField;
+    private CompositeActor dialogBox;
+    private SceneLoader sc;
 
-	public LoginStage(SceneLoader sceneLoader) {
-		super(new StretchViewport(1366, 768));
-		
-		this.sc = sceneLoader;
-		
-		//Loading components that can be used later
-		CompositeItemVO _dialogBox = sceneLoader.loadVoFromLibrary("grayDialogBox");
-		dialogBox = new CompositeActor(_dialogBox, sceneLoader.getRm());
-		dialogBox.setVisible(false);
-		this.addActor(dialogBox);				
+    public LoginStage(SceneLoader sceneLoader) {
+        super(new StretchViewport(1366, 768));
 
-		// Load default skin
-		skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
+        this.sc = sceneLoader;
 
-		ItemWrapper rootItem = new ItemWrapper(sceneLoader.getRoot());
+        //Loading components that can be used later
+        CompositeItemVO _dialogBox = sceneLoader.loadVoFromLibrary("grayDialogBox");
+        dialogBox = new CompositeActor(_dialogBox, sceneLoader.getRm());
+        dialogBox.setVisible(false);
+        this.addActor(dialogBox);
 
-		// Login input transform
-		TransformComponent loginInputTransform = rootItem.getChild("login").getEntity()
-				.getComponent(TransformComponent.class);
-		// Password input transform
-		TransformComponent passInputTransform = rootItem.getChild("password").getEntity()
-				.getComponent(TransformComponent.class);
+        // Load default skin
+        skin = new Skin(Gdx.files.internal("skin/uiskin.json"));
 
-		loginInputField = new TextField("", skin);
-		loginInputField.setMessageText("Username");
-		loginInputField.setPosition((loginInputTransform.x - 10) * Values.WORLD_UNITS,
-				loginInputTransform.y * Values.WORLD_UNITS);
-		loginInputField.setSize(300, 40);
+        ItemWrapper rootItem = new ItemWrapper(sceneLoader.getRoot());
 
-		passInputField = new TextField("", skin);
-		passInputField.setPasswordMode(true);
-		passInputField.setPasswordCharacter('*');
-		passInputField.setMessageText("Password");
-		passInputField.setPosition((passInputTransform.x - 10) * Values.WORLD_UNITS,
-				passInputTransform.y * Values.WORLD_UNITS);
-		passInputField.setSize(300, 40);
+        // Login input transform
+        TransformComponent loginInputTransform = rootItem.getChild("login").getEntity()
+                .getComponent(TransformComponent.class);
+        // Password input transform
+        TransformComponent passInputTransform = rootItem.getChild("password").getEntity()
+                .getComponent(TransformComponent.class);
 
-		this.addActor(loginInputField);
-		this.addActor(passInputField);
+        loginInputField = new TextField("", skin);
+        loginInputField.setMessageText("Username");
+        loginInputField.setPosition((loginInputTransform.x - 10) * Values.WORLD_UNITS,
+                loginInputTransform.y * Values.WORLD_UNITS);
+        loginInputField.setSize(300, 40);
 
-		Gdx.input.setInputProcessor(this);
-	}
+        passInputField = new TextField("", skin);
+        passInputField.setPasswordMode(true);
+        passInputField.setPasswordCharacter('*');
+        passInputField.setMessageText("Password");
+        passInputField.setPosition((passInputTransform.x - 10) * Values.WORLD_UNITS,
+                passInputTransform.y * Values.WORLD_UNITS);
+        passInputField.setSize(300, 40);
 
-	public String getLoginInputText() {
-		
-		return loginInputField.getText();
-		
-	}
+        //this.addActor(loginInputField);
+        //this.addActor(passInputField);
 
-	public char[] getPasswordInputText() {
+        Gdx.input.setInputProcessor(this);
+    }
 
-		return passInputField.getText().toCharArray();
-		
-	}
-	
-	public void showDialog(String title, String content, List<ButtonDescription> buttons) {
-				
-		Label lbl_title = (Label) dialogBox.getItem("dialogTitle");
-		Label lbl_content = (Label) dialogBox.getItem("dialogContent");
-		
-		lbl_title.setText(title);
-		lbl_content.setText(content);
-		lbl_content.setWrap(true);
-		
-		dialogBox.setZIndex(10);		
-		dialogBox.setPosition((Gdx.graphics.getWidth() / 2) - dialogBox.getWidth() / 2,
-							  (Gdx.graphics.getHeight() / 2) - dialogBox.getHeight() / 2);
-		
-		Table buttonsBar = new Table();
-		buttonsBar.setWidth(dialogBox.getWidth());
-				
-		for(ButtonDescription button : buttons) {
-			
-			switch(button.getColor()) {
-				case AMBER:
-					break;
-				case BLUE:											
-					
-					break;
-				case GREEN:
-					break;
-				case RED:
-					CompositeItemVO _redButton = sc.loadVoFromLibrary("redButton");
-					CompositeActor redButton = new CompositeActor(_redButton, sc.getRm());
-					
-					Label defaultState = (Label) redButton.getItem("defaultText");
-					Label pressedState = (Label) redButton.getItem("pressedText");
-					
-					defaultState.setText(button.getText());
-					pressedState.setText(button.getText());										
-					redButton.addListener(button.getListener());
-					redButton.setPosition(dialogBox.getWidth() - redButton.getWidth() - 5, redButton.getY() + 5);					
-					dialogBox.addActor(redButton);					
-					break;
-				default:
-					break;								
-			}						 
-			
-		}
-		
-		//dialogBox.addActor(buttonsBar);		
-		dialogBox.setVisible(true);
-	}
+    public String getLoginInputText() {
 
-	public void hideDialog() {
-		dialogBox.setVisible(false);
-	}
-	
+        return loginInputField.getText();
+
+    }
+
+    public char[] getPasswordInputText() {
+
+        return passInputField.getText().toCharArray();
+
+    }
+
+    public void showDialog(String title, String content, List<ButtonDescription> buttons) {
+
+        Label lbl_title = (Label) dialogBox.getItem("dialogTitle");
+        Label lbl_content = (Label) dialogBox.getItem("dialogContent");
+
+        lbl_title.setText(title);
+        lbl_content.setText(content);
+        lbl_content.setWrap(true);
+
+        //dialogBox.setZIndex(10);
+        dialogBox.setPosition((Gdx.graphics.getWidth() / 2) - dialogBox.getWidth() / 2,
+                (Gdx.graphics.getHeight() / 2) - dialogBox.getHeight() / 2);
+
+        Table buttonsBar = new Table();
+        buttonsBar.setWidth(dialogBox.getWidth());
+
+        for (ButtonDescription button : buttons) {
+
+            switch (button.getColor()) {
+                case AMBER:
+                    break;
+                case BLUE:
+
+                    break;
+                case GREEN:
+                    break;
+                case RED:
+                    CompositeItemVO _redButton = sc.loadVoFromLibrary("redButton");
+                    CompositeActor redButton = new CompositeActor(_redButton, sc.getRm());
+
+                    Label defaultState = (Label) redButton.getItem("defaultText");
+                    Label pressedState = (Label) redButton.getItem("pressedText");
+
+                    defaultState.setText(button.getText());
+                    pressedState.setText(button.getText());
+                    redButton.addListener(button.getListener());
+                    redButton.setPosition(dialogBox.getWidth() - redButton.getWidth() - 5, redButton.getY() + 5);
+                    dialogBox.addActor(redButton);
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
+        //dialogBox.addActor(buttonsBar);
+        dialogBox.setVisible(true);
+    }
+
+    public void hideDialog() {
+        dialogBox.setVisible(false);
+    }
+
 }

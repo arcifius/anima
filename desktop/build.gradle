@@ -2,9 +2,10 @@ apply plugin: "java"
 
 sourceCompatibility = 1.8
 sourceSets.main.java.srcDirs = [ "src/" ]
+sourceSets.main.resources.srcDirs = ["../core/assets"]
 
-project.ext.mainClassName = "br.com.anima.desktop.DesktopLauncher"
-project.ext.assetsDir = new File("../core/assets");
+project.ext.mainClassName = "com.mygdx.game.desktop.DesktopLauncher"
+project.ext.assetsDir = new File("../core/assets")
 
 task run(dependsOn: classes, type: JavaExec) {
     main = project.mainClassName
@@ -14,56 +15,27 @@ task run(dependsOn: classes, type: JavaExec) {
     ignoreExitValue = true
 }
 
-task dist(dependsOn: [build], type: Jar) {
-    from files(sourceSets.main.output.classesDir)
-    from files(sourceSets.main.output.resourcesDir)
-    from {configurations.compile.collect {zipTree(it)}}
-    from files(project.assetsDir);
- 
+task debug(dependsOn: classes, type: JavaExec) {
+    main = project.mainClassName
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+    workingDir = project.assetsDir
+    ignoreExitValue = true
+    debug = true
+}
+
+task dist(type: Jar) {
     manifest {
         attributes 'Main-Class': project.mainClassName
     }
-    
+    dependsOn configurations.runtimeClasspath
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
     with jar
 }
 
-task publish(type: Copy) {
-	copy {
-		from 'build/libs/desktop-1.0.jar'
-		into "/opt/apache-tomcat-8.0.37/webapps/downloads/"		
-	}
-}
-
-task buildAndPublish {
-    dependsOn 'clean'
-    dependsOn 'build'
-    dependsOn 'dist'
-    dependsOn 'publish'
-    tasks.findByName('build').mustRunAfter 'clean'
-    tasks.findByName('dist').mustRunAfter 'build'
-    tasks.findByName('publish').mustRunAfter 'dist'
-}	
-
-repositories {
-    mavenCentral()
-}
 
 dist.dependsOn classes
 
-eclipse {
-    project {
-        name = appName + "-desktop"
-        linkedResource name: 'assets', type: '2', location: 'PARENT-1-PROJECT_LOC/core/assets'
-    }
-}
-
-task afterEclipseImport(description: "Post processing after project generation", group: "IDE") {
-  doLast {
-    def classpath = new XmlParser().parse(file(".classpath"))
-    new Node(classpath, "classpathentry", [ kind: 'src', path: 'assets' ]);
-    def writer = new FileWriter(file(".classpath"))
-    def printer = new XmlNodePrinter(new PrintWriter(writer))
-    printer.setPreserveWhitespace(true)
-    printer.print(classpath)
-  }
-}
+eclipse.project.name = appName + "-desktop"

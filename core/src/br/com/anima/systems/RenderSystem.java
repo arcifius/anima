@@ -1,107 +1,98 @@
 package br.com.anima.systems;
 
-import com.badlogic.ashley.core.ComponentMapper;
-import com.badlogic.ashley.core.Engine;
-import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.EntitySystem;
-import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
-import com.badlogic.gdx.graphics.g3d.environment.AmbientCubemap;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-
-import br.com.anima.GameManager;
 import br.com.anima.components.AnimatorComponent;
-import br.com.anima.components.ControlledComponent;
 import br.com.anima.components.PositionComponent;
 import br.com.anima.components.SpriteComponent;
 import br.com.anima.interfaces.Initializable;
-import br.com.anima.utils.AnimaAnimation;
-import br.com.anima.utils.Box2DUtils;
 import br.com.anima.utils.Objects;
-import br.com.anima.utils.Values;
+import com.badlogic.ashley.core.*;
+import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.esotericsoftware.spine.SkeletonRenderer;
 
 public class RenderSystem extends EntitySystem implements Initializable {
-	
-	private GameManager game;
-	private Engine engine;
-	private TiledMap[] maps;
-	private OrthogonalTiledMapRenderer mapRenderer;
-	
-	private ImmutableArray<Entity> entities, animators;	
-	private Entity player;
+    private ImmutableArray<Entity> entities, animators;
+    private OrthogonalTiledMapRenderer mapRenderer;
+    private SkeletonRenderer skeletonRenderer;
 
-	private ComponentMapper<SpriteComponent> spriteMapper = ComponentMapper.getFor(SpriteComponent.class);
-	private ComponentMapper<AnimatorComponent> animatorMapper = ComponentMapper.getFor(AnimatorComponent.class);
-	private ComponentMapper<PositionComponent> posMapper = ComponentMapper.getFor(PositionComponent.class);
-	
-    private float elapsedTime = 0;
+    private final ComponentMapper<AnimatorComponent> animatorMapper;
+    private final ComponentMapper<SpriteComponent> spriteMapper;
+    private final ComponentMapper<PositionComponent> posMapper;
 
-	@Override
-	public void addedToEngine(Engine engine) {
-		this.engine = engine;
-		
-		player = engine.getEntitiesFor(Family.all(ControlledComponent.class).get()).get(0);
-		entities = engine.getEntitiesFor(Family.all(SpriteComponent.class).get());		
-		animators = engine.getEntitiesFor(Family.all(AnimatorComponent.class).get());
-	}
-	
-	@Override
-	public void init() {
-		
-		maps = new TiledMap[Values.MAPS];
+    public RenderSystem() {
+        this.spriteMapper = ComponentMapper.getFor(SpriteComponent.class);
+        this.animatorMapper = ComponentMapper.getFor(AnimatorComponent.class);
+        this.posMapper = ComponentMapper.getFor(PositionComponent.class);
+    }
 
-		TmxMapLoader mapLoader = new TmxMapLoader(new InternalFileHandleResolver());
+    @Override
+    public void addedToEngine(Engine engine) {
+        this.entities = engine.getEntitiesFor(Family.all(SpriteComponent.class).get());
+        this.animators = engine.getEntitiesFor(Family.all(AnimatorComponent.class).get());
+    }
 
-		maps[0] = mapLoader.load("maps/mapa.tmx");
+    @Override
+    public void init() {
+        // TODO: change this logic render system shouldn't decide which map should be rendered.
+        TiledMap map = Objects.assetManager.get("maps/debain.tmx");
+        this.mapRenderer = new OrthogonalTiledMapRenderer(map, 1f / 32f);
+        this.skeletonRenderer = new SkeletonRenderer();
 
-		mapRenderer = new OrthogonalTiledMapRenderer(maps[0]);
-		
-		Box2DUtils.detectCollision(mapRenderer.getMap().getLayers().get("collision"));
-		
-		Objects.mapsize.changeMapDimensions(200, Values.TILE_SIZE);				
-		
-	}
+        // TODO: Think about collisions, better.
+        // Box2DUtils.detectCollision(mapRenderer.getMap().getLayers().get("collision"));
+    }
 
-	@Override
-	public void update(float deltaTime) {
+    @Override
+    public void update(float deltaTime) {
+        mapRenderer.setView(Objects.camera);
+        mapRenderer.render();
+        this.renderEntities();
+    }
 
-		mapRenderer.setView(Objects.camera);
-		mapRenderer.render(Values.GROUND_LAYERS);
+    public void renderEntities() {
+        float delta = Gdx.graphics.getDeltaTime();
 
-		Objects.spriteBatch.setProjectionMatrix(Objects.camera.combined);
-		Objects.spriteBatch.begin();
+        Objects.spriteBatch.begin();
 
-		for (Entity sprite : entities) {
-			SpriteComponent spriteComp = spriteMapper.get(sprite);
-			
-			spriteComp.sprite.draw(Objects.spriteBatch);
-		}
-		
-		elapsedTime += Gdx.graphics.getDeltaTime();
-		
-		for(Entity animator : animators) {
-								
-			AnimatorComponent animatorComp = animatorMapper.get(animator);
-			PositionComponent positionComp = posMapper.get(animator);
-			
-			AnimaAnimation[] animations = animatorComp.animations;
-			
-			if(animatorComp.isIdle()) {
-				Objects.spriteBatch.draw(animations[animatorComp.current].getKeyFrame(0.1F), positionComp.x, positionComp.y);
-			} else {
-				Objects.spriteBatch.draw(animations[animatorComp.current].getKeyFrame(elapsedTime, true), positionComp.x, positionComp.y);
-			}
-			
-		}
+        for (Entity sprite : entities) {
+            SpriteComponent spriteComp = spriteMapper.get(sprite);
+            spriteComp.sprite.draw(Objects.spriteBatch);
+        }
 
-		Objects.spriteBatch.end();
-		
-		mapRenderer.render(Values.OVER_LAYERS);
-		
-	}
+        for (Entity animator : animators) {
+            AnimatorComponent animatorComp = animatorMapper.get(animator);
+            PositionComponent positionComp = posMapper.get(animator);
+
+            // TODO: move this to another system
+            animatorComp.state.update(delta);
+            animatorComp.state.apply(animatorComp.skeleton);
+            if (this.shouldUpdateAnimation(animatorComp)) {
+                animatorComp.state.setAnimation(0, animatorComp.currentAnimation, true);
+            }
+
+            // TODO: move this to another system
+            animatorComp.skeleton.setPosition(positionComp.x + 20, positionComp.y - 5);
+            animatorComp.skeleton.updateWorldTransform();
+
+            skeletonRenderer.draw(Objects.spriteBatch, animatorComp.skeleton);
+        }
+
+        Objects.spriteBatch.end();
+    }
+
+    private boolean shouldUpdateAnimation(AnimatorComponent component) {
+        // TODO: change this logic to:
+        // Animation jumpAnimation = skeletonData.findAnimation("jump");
+        // ...
+        // if (skeleAnim.state.GetCurrent(0) != jumpAnimation) { ... }
+
+        if (component.state.getCurrent(0) == null) {
+            return true;
+        }
+
+        return !component.state.getCurrent(0).toString().equals(component.currentAnimation);
+    }
 
 }
