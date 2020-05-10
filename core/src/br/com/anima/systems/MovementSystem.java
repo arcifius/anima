@@ -3,27 +3,21 @@ package br.com.anima.systems;
 import br.com.anima.components.AnimatorComponent;
 import br.com.anima.components.MovementComponent;
 import br.com.anima.components.PositionComponent;
-import br.com.anima.interfaces.Initializable;
 import br.com.anima.utils.Values;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 
-public class MovementSystem extends EntitySystem implements Initializable {
+public class MovementSystem extends EntitySystem {
     private ImmutableArray<Entity> entities;
 
     private final ComponentMapper<PositionComponent> positionMapper;
     private final ComponentMapper<MovementComponent> movementMapper;
-    private final ComponentMapper<AnimatorComponent> animatortMapper;
+    private final ComponentMapper<AnimatorComponent> animatorMapper;
 
     public MovementSystem() {
         this.positionMapper = ComponentMapper.getFor(PositionComponent.class);
         this.movementMapper = ComponentMapper.getFor(MovementComponent.class);
-        this.animatortMapper = ComponentMapper.getFor(AnimatorComponent.class);
-    }
-
-    @Override
-    public void init() {
-        // Nothing yet
+        this.animatorMapper = ComponentMapper.getFor(AnimatorComponent.class);
     }
 
     @Override
@@ -46,7 +40,7 @@ public class MovementSystem extends EntitySystem implements Initializable {
         for (Entity entity : this.entities) {
             PositionComponent position = this.positionMapper.get(entity);
             MovementComponent movement = this.movementMapper.get(entity);
-            AnimatorComponent animator = this.animatortMapper.get(entity);
+            AnimatorComponent animator = this.animatorMapper.get(entity);
 
             float speed = (movement.speed * deltaTime);
 

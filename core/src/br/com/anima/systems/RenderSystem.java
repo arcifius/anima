@@ -46,8 +46,8 @@ public class RenderSystem extends EntitySystem implements Initializable {
 
     @Override
     public void update(float deltaTime) {
-        mapRenderer.setView(Objects.camera);
-        mapRenderer.render();
+        this.mapRenderer.setView(Objects.camera);
+        this.mapRenderer.render();
         this.renderEntities();
     }
 

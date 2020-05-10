@@ -12,8 +12,7 @@ import br.com.anima.utils.Monster;
 import br.com.anima.utils.Objects;
 import br.com.anima.utils.Values;
 import com.badlogic.ashley.core.Engine;
-import com.badlogic.ashley.core.EntitySystem;
-import com.badlogic.ashley.utils.ImmutableArray;
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
@@ -22,7 +21,10 @@ import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.World;
 import com.github.czyzby.lml.parser.impl.AbstractLmlView;
 
-import java.util.stream.Stream;
+import java.util.LinkedList;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
 
 public class GameView extends AbstractLmlView {
     private Engine engine;
@@ -43,44 +45,49 @@ public class GameView extends AbstractLmlView {
 
     @Override
     public void show() {
-        Objects.camera = this.createCamera();
         Objects.world = new World(Values.WORLD_GRAVITY, false);
+        Objects.camera = this.createCamera();
+        this.engine = new Engine();
 
         // (31 / 225f) where 31 is the RGB
         Gdx.gl.glClearColor(0.1378f, 0.1378f, 0.1378f, 1);
 
-        this.engine = new Engine();
+        // Adding entities
+        List<Entity> entities = this.getInitialEntities();
+        entities.forEach(entity -> this.engine.addEntity(entity));
 
-        /* ADDING ENTITIES */
-        this.engine.addEntity(EntityFactory.createPlayer(0, 0, 0.25F, BodyDef.BodyType.DynamicBody));
-        this.engine.addEntity(EntityFactory.createEnemy(Monster.TROLL, 288, 0, 1F, BodyDef.BodyType.DynamicBody));
-        this.engine.addEntity(EntityFactory.createEnemy(Monster.TROLL, 800, 0, 1F, BodyDef.BodyType.StaticBody));
-        this.engine.addEntity(EntityFactory.createEnemy(Monster.AIRPLANE, 800, 480, 0.25F, BodyDef.BodyType.StaticBody));
+        // Adding systems
+        this.addSystems();
 
-        /* ADDING SYSTEMS */
+        // Bootstrapping systems
+        this.engine.getSystems().forEach(system -> {
+            if (system instanceof Initializable) {
+                ((Initializable) system).init();
+            }
+
+            if (system instanceof Createable) {
+                ((Createable) system).create();
+            }
+        });
+    }
+
+    private List<Entity> getInitialEntities() {
+        return new LinkedList<>(List.of(
+                requireNonNull(EntityFactory.createPlayer(0, 0, 0.25F, BodyDef.BodyType.DynamicBody)),
+                requireNonNull(EntityFactory.createEnemy(Monster.TROLL, 288, 0, 1F, BodyDef.BodyType.DynamicBody)),
+                requireNonNull(EntityFactory.createEnemy(Monster.TROLL, 800, 0, 1F, BodyDef.BodyType.StaticBody)),
+                requireNonNull(EntityFactory.createEnemy(Monster.AIRPLANE, 800, 480, 0.25F, BodyDef.BodyType.StaticBody))
+        ));
+    }
+
+    private void addSystems() {
         this.engine.addSystem(new ControlSystem());
-        //this.engine.addSystem(new UpdateBox2DSystem());
-        // this.engine.addSystem(new CameraSystem());
         this.engine.addSystem(new MapControllerSystem());
         this.engine.addSystem(new RenderSystem());
-        //this.engine.addSystem(new Box2DDebugRendererSystem());
         this.engine.addSystem(new MovementSystem());
-
-        /* RETRIEVING ALL ADDED SYSTEMS */
-        ImmutableArray<EntitySystem> systems = this.engine.getSystems();
-
-        // INITIALIZING SYSTEMS
-        Stream.of(systems)
-                .filter(system -> system instanceof Initializable)
-                .forEach(system -> ((Initializable) system).init());
-
-        // CREATING SYSTEMS
-        for (int i = 0; i < systems.size(); i++) {
-            if (systems.get(i) instanceof Createable) {
-                Createable create = (Createable) systems.get(i);
-                create.create();
-            }
-        }
+        //this.engine.addSystem(new UpdateBox2DSystem());
+        //this.engine.addSystem(new CameraSystem());
+        //this.engine.addSystem(new Box2DDebugRendererSystem());
     }
 
     private OrthographicCamera createCamera() {
@@ -99,8 +106,10 @@ public class GameView extends AbstractLmlView {
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        // TODO: maybe we won't need a world physics at all
         Objects.world.step(delta, 6, 2);
 
+        // Updating ECS engine with delta time
         this.engine.update(delta);
     }
 }
