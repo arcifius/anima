@@ -1,6 +1,7 @@
 package br.com.anima.systems;
 
 import br.com.anima.components.AnimatorComponent;
+import br.com.anima.components.MapComponent;
 import br.com.anima.components.PositionComponent;
 import br.com.anima.components.SpriteComponent;
 import br.com.anima.interfaces.Initializable;
@@ -8,47 +9,57 @@ import br.com.anima.utils.Objects;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.esotericsoftware.spine.SkeletonRenderer;
 
 public class RenderSystem extends EntitySystem implements Initializable {
-    private ImmutableArray<Entity> entities, animators;
-    private OrthogonalTiledMapRenderer mapRenderer;
+    private ImmutableArray<Entity> entities, animators, maps;
     private SkeletonRenderer skeletonRenderer;
 
     private final ComponentMapper<AnimatorComponent> animatorMapper;
+    private final ComponentMapper<PositionComponent> positionMapper;
     private final ComponentMapper<SpriteComponent> spriteMapper;
-    private final ComponentMapper<PositionComponent> posMapper;
+    private final ComponentMapper<MapComponent> mapMapper;
+    private final OrthographicCamera camera;
 
-    public RenderSystem() {
+    public RenderSystem(OrthographicCamera camera) {
         this.spriteMapper = ComponentMapper.getFor(SpriteComponent.class);
         this.animatorMapper = ComponentMapper.getFor(AnimatorComponent.class);
-        this.posMapper = ComponentMapper.getFor(PositionComponent.class);
+        this.positionMapper = ComponentMapper.getFor(PositionComponent.class);
+        this.mapMapper = ComponentMapper.getFor(MapComponent.class);
+        this.camera = camera;
     }
 
     @Override
     public void addedToEngine(Engine engine) {
         this.entities = engine.getEntitiesFor(Family.all(SpriteComponent.class).get());
         this.animators = engine.getEntitiesFor(Family.all(AnimatorComponent.class).get());
+        this.maps = engine.getEntitiesFor(Family.all(MapComponent.class).get());
     }
 
     @Override
     public void init() {
-        // TODO: change this logic render system shouldn't decide which map should be rendered.
-        TiledMap map = Objects.assetManager.get("maps/debain.tmx");
-        this.mapRenderer = new OrthogonalTiledMapRenderer(map, 1f / 32f);
         this.skeletonRenderer = new SkeletonRenderer();
 
-        // TODO: Think about collisions, better.
+        // TODO: Move this to another system.
+        // TiledMapTileLayer collision = (TiledMapTileLayer) mapRenderer.getMap().getLayers().get("collision");
         // Box2DUtils.detectCollision(mapRenderer.getMap().getLayers().get("collision"));
     }
 
     @Override
     public void update(float deltaTime) {
-        this.mapRenderer.setView(Objects.camera);
-        this.mapRenderer.render();
+        this.renderMaps();
         this.renderEntities();
+    }
+
+    public void renderMaps() {
+        for (Entity map : this.maps) {
+            MapComponent mapComponent = this.mapMapper.get(map);
+            if (mapComponent.renderer != null) {
+                mapComponent.renderer.setView(this.camera);
+                mapComponent.renderer.render();
+            }
+        }
     }
 
     public void renderEntities() {
@@ -63,7 +74,7 @@ public class RenderSystem extends EntitySystem implements Initializable {
 
         for (Entity animator : animators) {
             AnimatorComponent animatorComp = animatorMapper.get(animator);
-            PositionComponent positionComp = posMapper.get(animator);
+            PositionComponent positionComp = positionMapper.get(animator);
 
             // TODO: move this to another system
             animatorComp.state.update(delta);

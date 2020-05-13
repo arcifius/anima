@@ -1,10 +1,8 @@
 package br.com.anima.utils;
 
 public enum ButtonColor {
-
-	GREEN,
-	BLUE,
-	AMBER,
-	RED
-	
+    GREEN,
+    BLUE,
+    AMBER,
+    RED
 }

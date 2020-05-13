@@ -5,7 +5,6 @@ import br.com.anima.components.Box2DComponent;
 import br.com.anima.components.PositionComponent;
 import br.com.anima.components.SpriteComponent;
 import br.com.anima.interfaces.Initializable;
-import br.com.anima.utils.Meters;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.Vector2;
@@ -42,10 +41,10 @@ public class UpdateBox2DSystem extends EntitySystem implements Initializable {
 
             Vector2 bodyPosition = box2d.body.getPosition();
 
-            float newX = Meters.toPixels(bodyPosition.x) - visual.sprite.getWidth() / 2;
-            float newY = Meters.toPixels(bodyPosition.y) - visual.sprite.getHeight() / 2;
+            //float newX = Meters.toPixels(bodyPosition.x) - visual.sprite.getWidth() / 2;
+            //float newY = Meters.toPixels(bodyPosition.y) - visual.sprite.getHeight() / 2;
 
-            visual.sprite.setPosition(newX, newY);
+            visual.sprite.setPosition(0, 0);
         }
 
         for (int i = 0; i < animatedEntities.size(); i++) {

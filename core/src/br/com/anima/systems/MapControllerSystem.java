@@ -1,15 +1,11 @@
 package br.com.anima.systems;
 
-import br.com.anima.Igniter;
+import br.com.anima.components.MapComponent;
 import br.com.anima.interfaces.Createable;
 import br.com.anima.interfaces.Initializable;
 import br.com.anima.utils.Objects;
-import br.com.anima.utils.RunnablePool;
-import com.badlogic.ashley.core.Engine;
-import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.EntitySystem;
+import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
@@ -19,19 +15,25 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.utils.Array;
 
 public class MapControllerSystem extends EntitySystem implements Initializable, Createable {
-
-    private final Igniter igniter = (Igniter) Gdx.app.getApplicationListener();
-    private Engine engine;
-    private Entity player;
-    private TiledMap[] maps;
-    private OrthogonalTiledMapRenderer mapRenderer;
-    private boolean[][] solids;
+    private final ComponentMapper<MapComponent> mapMapper;
     private ImmutableArray<Body> tiledMapBodies;
+    private ImmutableArray<Entity> entities;
     private Array<Entity> pointLights;
     private Array<Entity> enemies;
-    private RunnablePool runnablePool;
-    private boolean alreadyHurted = false;
-    private int lastGate = -1;
+    private boolean[][] solids;
+
+    public MapControllerSystem() {
+        this.mapMapper = ComponentMapper.getFor(MapComponent.class);
+    }
+
+    @Override
+    public void addedToEngine(Engine engine) {
+        this.entities = engine.getEntitiesFor(Family.all(MapComponent.class).get());
+
+        if (entities.size() > 1) {
+            throw new RuntimeException("Only one entity can hold MapComponent!");
+        }
+    }
 
     @Override
     public void init() {
@@ -44,12 +46,17 @@ public class MapControllerSystem extends EntitySystem implements Initializable, 
 
     @Override
     public void create() {
-
+        TiledMap map = Objects.assetManager.get("maps/debain.tmx");
     }
 
     @Override
     public void update(float deltaTime) {
-
+        for (Entity entity : entities) {
+            // TODO: improve this to not create a new instance of renderer on each frame
+            MapComponent mapper = this.mapMapper.get(entity);
+            TiledMap map = Objects.assetManager.get("maps/" + mapper.map + ".tmx");
+            mapper.renderer = new OrthogonalTiledMapRenderer(map, 1f / 32f);
+        }
     }
 
     private void loadMap(int map, Vector2 newPosition) {
