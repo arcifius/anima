@@ -10,4 +10,4 @@ The project is integrated with overlap2D for interfaces and support. The game it
 * Relying on tiled maps (Orthogonal ones)
 * The arts are made by a friend of mine but feel free to use them (:
 
-I hope that code and package organization are nice enough... 
+Recently updated to latest libGDX version... some bugs were raised but I'm out of time to track them... fell free to contribute (:
